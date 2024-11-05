@@ -16,6 +16,8 @@ ament_target_dependencies(merger_node rclcpp sensor_msgs pcl_conversions pcl_ros
 install(TARGETS merger_node DESTINATION lib/${PROJECT_NAME})
 
 install(DIRECTORY launch/ DESTINATION share/dual_laser_merger)
+install(DIRECTORY bag DESTINATION share/dual_laser_merger)
+install(DIRECTORY config DESTINATION share/dual_laser_merger)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
