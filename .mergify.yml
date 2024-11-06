@@ -1,27 +1,11 @@
 pull_request_rules:
-  - name: Label Mergify Stacks PRs
-    description: Pull requests that are part of a Mergify stack should be labeled as such
+  - name: backport patches to the stable branch
     conditions:
-      - "body ~= ^Change-Id:"
+      - label = backport
     actions:
-      label:
-        toggle:
-          - stack
-  - name: Ping PR author when conflicting
-    description: Warn the pull request author when their PR are conflicting
-    conditions:
-      - conflict
-      - -closed
-    actions:
-      comment:
-        message: "👋 {{author}} your PR is conflicting and needs to be updated to be
-          merged\n"
-  - name: Label conflicting pull requests
-    description: Add a label to a pull request with conflict to spot it easily
-    conditions:
-      - conflict
-      - -closed
-    actions:
-      label:
-        toggle:
-          - conflict
+      backport:
+        branches:
+          - "jazzy"
+          - "humble"
+        assignees:
+          - "{{ author }}"
