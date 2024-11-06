@@ -1,19 +1,19 @@
 rosbag2_bagfile_information:
   version: 9
-  storage_identifier: mcap
+  storage_identifier: sqlite3
   duration:
-    nanoseconds: 321239889975
+    nanoseconds: 34779724015
   starting_time:
-    nanoseconds_since_epoch: 1729076510623688216
-  message_count: 9640
+    nanoseconds_since_epoch: 1730860857700285597
+  message_count: 1046
   topics_with_message_count:
     - topic_metadata:
-        name: /lidar1/scan
+        name: /lidar2/scan
         type: sensor_msgs/msg/LaserScan
         serialization_format: cdr
         offered_qos_profiles:
-          - history: keep_last
-            depth: 1
+          - history: unknown
+            depth: 0
             reliability: reliable
             durability: volatile
             deadline:
@@ -28,29 +28,14 @@ rosbag2_bagfile_information:
               nsec: 854775807
             avoid_ros_namespace_conventions: false
         type_description_hash: RIHS01_64c191398013af96509d518dac71d5164f9382553fce5c1f8cca5be7924bd828
-      message_count: 4819
+      message_count: 522
     - topic_metadata:
         name: /tf_static
         type: tf2_msgs/msg/TFMessage
         serialization_format: cdr
         offered_qos_profiles:
-          - history: keep_last
-            depth: 1
-            reliability: reliable
-            durability: transient_local
-            deadline:
-              sec: 9223372036
-              nsec: 854775807
-            lifespan:
-              sec: 9223372036
-              nsec: 854775807
-            liveliness: automatic
-            liveliness_lease_duration:
-              sec: 9223372036
-              nsec: 854775807
-            avoid_ros_namespace_conventions: false
-          - history: keep_last
-            depth: 1
+          - history: unknown
+            depth: 0
             reliability: reliable
             durability: transient_local
             deadline:
@@ -67,12 +52,12 @@ rosbag2_bagfile_information:
         type_description_hash: RIHS01_e369d0f05a23ae52508854b66f6aa0437f3449d652e8cbf22d5abe85d020f087
       message_count: 2
     - topic_metadata:
-        name: /lidar2/scan
+        name: /lidar1/scan
         type: sensor_msgs/msg/LaserScan
         serialization_format: cdr
         offered_qos_profiles:
-          - history: keep_last
-            depth: 1
+          - history: unknown
+            depth: 0
             reliability: reliable
             durability: volatile
             deadline:
@@ -87,17 +72,17 @@ rosbag2_bagfile_information:
               nsec: 854775807
             avoid_ros_namespace_conventions: false
         type_description_hash: RIHS01_64c191398013af96509d518dac71d5164f9382553fce5c1f8cca5be7924bd828
-      message_count: 4819
+      message_count: 522
   compression_format: ""
   compression_mode: ""
   relative_file_paths:
-    - dual_lidar_0.mcap
+    - dual_lidar_0.db3
   files:
-    - path: dual_lidar_0.mcap
+    - path: dual_lidar_0.db3
       starting_time:
-        nanoseconds_since_epoch: 1729076510623688216
+        nanoseconds_since_epoch: 1730860857700285597
       duration:
-        nanoseconds: 321239889975
-      message_count: 9640
+        nanoseconds: 34779724015
+      message_count: 1046
   custom_data: ~
-  ros_distro: jazzy
+  ros_distro: humble
