@@ -1,12 +1,12 @@
 # dual_laser_merger
 ![License](https://img.shields.io/badge/license-Apache%202.0-blue)
 
-ROS 2 Package to merge dual lidar scan data.
+ROS 2 Package to merge dual lidar scan data. This package provide a node to concatenate pointcloud. First the laser scans are coverted to pointclouds which is then transformed to `target_frame` and concatenated. After this concatenated pointcloud is convert to laserscan.
 
 ![demo](https://github.com/user-attachments/assets/cdf14b8c-fc4b-4cb2-8e8b-e320c54b3eda)
 
 ## Build from source
-This package currently works on ROS 2 Distributions: **Jazzy, Rolling**
+This package currently works on ROS 2 Distributions: **Humble, Jazzy, Rolling**
 ```
 mkdir laser_merger_ws/src -p
 cd laser_merger_ws/src
@@ -109,6 +109,9 @@ def generate_launch_description():
             'range_max': '25.0',
             'min_height': '-1.0',
             'max_height': '1.0',
+            'angle_min': '-3.141592654',
+            'angle_max': '3.141592654',
+            'use_inf': 'false',
         }.items(),
     )
 
@@ -131,6 +134,9 @@ The following arguments can be changed as needed
 | range_max | maximum range value [m] of merged laser scan data |
 | min_height | minimum height from target frame in which the scan ports are accepted [m] |
 | max_height | maximum height from target frame in which the scan ports are accepted [m] |
+| angle_min | minimum angle value [rad] of merged laser scan data |
+| angle_max | maximum angle value [rad] of merged laser scan data |
+| use_inf | if true reports infinite values as `+inf`, else reported as `range_max + 1` |
 
 ## Issues
 
