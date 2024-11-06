@@ -150,6 +150,32 @@ Visualization Manager:
       Use Fixed Frame: true
       Use rainbow: true
       Value: true
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Filter (blacklist): ""
+      Filter (whitelist): ""
+      Frame Timeout: 15
+      Frames:
+        All Enabled: true
+        laser_1:
+          Value: true
+        laser_2:
+          Value: true
+        lsc_mount:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        lsc_mount:
+          laser_1:
+            {}
+          laser_2:
+            {}
+      Update Interval: 0
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -196,7 +222,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 8.897801399230957
+      Distance: 8.595158576965332
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -211,10 +237,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.934796929359436
+      Pitch: 0.8947969675064087
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 2.8203978538513184
+      Yaw: 3.060399055480957
     Saved: ~
 Window Geometry:
   Displays:
