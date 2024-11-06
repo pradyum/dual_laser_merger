@@ -10,7 +10,7 @@ This package currently works on ROS 2 Distributions: **Humble, Jazzy, Rolling**
 ```
 mkdir laser_merger_ws/src -p
 cd laser_merger_ws/src
-git clone https://github.com/pradyum/dual_laser_merger.git
+git clone -b jazzy https://github.com/pradyum/dual_laser_merger.git
 cd ..
 rosdep install --from-paths src --ignore-src -r -y
 colcon build --symlink-install
