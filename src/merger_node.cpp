@@ -31,23 +31,19 @@ public:
   pcl_merger_class()
   : Node("pcl_merger")
   {
-    rclcpp::QoS qos_profile(10);
-    qos_profile.best_effort();
-    qos_profile.durability(RMW_QOS_POLICY_DURABILITY_VOLATILE);
-
     publish_rate = this->declare_parameter("publish_rate", 100);
     target_frame = this->declare_parameter("target_frame", "");
 
     cloud_in_1_sub = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "laser_1_cloud", qos_profile,
+      "laser_1_cloud", rclcpp::SensorDataQoS(),
       std::bind(&pcl_merger_class::cloud_in_1_cb, this, std::placeholders::_1));
 
     cloud_in_2_sub = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-      "laser_2_cloud", qos_profile,
+      "laser_2_cloud", rclcpp::SensorDataQoS(),
       std::bind(&pcl_merger_class::cloud_in_2_cb, this, std::placeholders::_1));
 
     cloud_out_pub =
-      this->create_publisher<sensor_msgs::msg::PointCloud2>("merged_cloud", qos_profile);
+      this->create_publisher<sensor_msgs::msg::PointCloud2>("merged_cloud", rclcpp::SensorDataQoS());
 
     if (target_frame.empty()) {
       RCLCPP_ERROR(this->get_logger(), "Target Frame cannot be Empty");
