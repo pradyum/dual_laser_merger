@@ -51,6 +51,9 @@ def generate_launch_description():
             'range_max': '25.0',
             'min_height': '-1.0',
             'max_height': '1.0',
+            'angle_min': '-3.141592654',
+            'angle_max': '3.141592654',
+            'use_inf': 'false',
         }.items(),
     )
 

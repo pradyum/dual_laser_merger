@@ -110,6 +110,30 @@ def generate_launch_description():
 
     ld.add_action(max_height_arg)
 
+    angle_min_arg = DeclareLaunchArgument(
+        'angle_min',
+        default_value='-3.141592654',
+        description='Laser - minimum scan angle parameter',
+    )
+
+    ld.add_action(angle_min_arg)
+
+    angle_max_arg = DeclareLaunchArgument(
+        'angle_max',
+        default_value='3.141592654',
+        description='Laser - maximum scan angle parameter',
+    )
+
+    ld.add_action(angle_max_arg)
+
+    use_inf_arg = DeclareLaunchArgument(
+        'use_inf',
+        default_value='false',
+        description='Laser - to report infinite range as +inf, else range_max + 1',
+    )
+
+    ld.add_action(use_inf_arg)
+
     node_laser_1_to_pcl = Node(
         package='pointcloud_to_laserscan',
         executable='laserscan_to_pointcloud_node',
@@ -193,6 +217,9 @@ def generate_launch_description():
             {'range_max': LaunchConfiguration('range_max')},
             {'min_height': LaunchConfiguration('min_height')},
             {'max_height': LaunchConfiguration('max_height')},
+            {'angle_min': LaunchConfiguration('angle_min')},
+            {'angle_max': LaunchConfiguration('angle_max')},
+            {'use_inf': LaunchConfiguration('use_inf')},
         ],
         remappings=[
             (
