@@ -176,7 +176,7 @@ def generate_launch_description():
 
     node_merger = Node(
         package='dual_laser_merger',
-        executable='merger_node',
+        executable='dual_laser_merger_node',
         output='both',
         parameters=[
             {'publish_rate': LaunchConfiguration('publish_rate')},
