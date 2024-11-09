@@ -6,11 +6,15 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_components REQUIRED)
-find_package(sensor_msgs REQUIRED)
+find_package(laser_geometry REQUIRED)
+find_package(message_filters REQUIRED)
 find_package(pcl_conversions REQUIRED)
 find_package(pcl_ros REQUIRED)
+find_package(rclcpp REQUIRED)
+find_package(rclcpp_components REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_sensor_msgs REQUIRED)
 
 add_library(dual_laser_merger SHARED
   src/dual_laser_merger.cpp)
@@ -21,10 +25,14 @@ target_include_directories(dual_laser_merger PUBLIC
 )
 
 target_link_libraries(dual_laser_merger
+  laser_geometry::laser_geometry
+  message_filters::message_filters
+  pcl_ros::pcd_to_pointcloud_lib
   rclcpp::rclcpp
   rclcpp_components::component
-  sensor_msgs::sensor_msgs_library
-  pcl_ros::pcd_to_pointcloud_lib
+  tf2::tf2
+  tf2_ros::tf2_ros
+  tf2_sensor_msgs::tf2_sensor_msgs
 )
 
 rclcpp_components_register_node(dual_laser_merger
@@ -33,11 +41,12 @@ rclcpp_components_register_node(dual_laser_merger
 
 install(TARGETS
   dual_laser_merger
-  EXPORT export_${PROJECT_NAME}
+  EXPORT export_dual_laser_merger
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)
 
+install(DIRECTORY include DESTINATION include/dual_laser_merger)
 install(DIRECTORY launch/ DESTINATION share/dual_laser_merger)
 install(DIRECTORY bag DESTINATION share/dual_laser_merger)
 install(DIRECTORY config DESTINATION share/dual_laser_merger)
@@ -51,5 +60,16 @@ if(BUILD_TESTING)
   set(ament_xmllint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+ament_export_dependencies(
+  laser_geometry
+  message_filters
+  pcl_ros
+  rclcpp
+  rclcpp_components
+  tf2
+  tf2_ros
+  tf2_sensor_msgs
+)
 
 ament_package()

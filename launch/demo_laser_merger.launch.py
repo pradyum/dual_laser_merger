@@ -14,9 +14,9 @@
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import ExecuteProcess, IncludeLaunchDescription
-from launch.launch_description_sources import PythonLaunchDescriptionSource
-from launch_ros.actions import Node
+from launch.actions import ExecuteProcess
+from launch_ros.actions import ComposableNodeContainer, Node
+from launch_ros.descriptions import ComposableNode
 
 
 def generate_launch_description():
@@ -33,28 +33,39 @@ def generate_launch_description():
 
     ld.add_action(play_bag_node)
 
-    dual_laser_merger_node = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            [
-                f"{get_package_share_directory('dual_laser_merger')}/dual_laser_merger.launch.py"
-            ]
-        ),
-        launch_arguments={
-            'laser_1_topic': 'lidar1/scan',
-            'laser_2_topic': 'lidar2/scan',
-            'merged_topic': 'merged/scan',
-            'publish_rate': '100',
-            'target_frame': 'lsc_mount',
-            'angle_increment': '0.001',
-            'scan_time': '0.067',
-            'range_min': '0.01',
-            'range_max': '25.0',
-            'min_height': '-1.0',
-            'max_height': '1.0',
-            'angle_min': '-3.141592654',
-            'angle_max': '3.141592654',
-            'use_inf': 'false',
-        }.items(),
+    dual_laser_merger_node = ComposableNodeContainer(
+        name='demo_container',
+        namespace='',
+        package='rclcpp_components',
+        executable='component_container',
+        composable_node_descriptions=[
+            ComposableNode(
+                package='dual_laser_merger',
+                plugin='merger_node::MergerNode',
+                name='dual_laser_merger',
+                parameters=[
+                    {'target_frame': 'lsc_mount'},
+                    {'tolerance': 0.01},
+                    {'queue_size': 5},
+                    {'angle_increment': 0.001},
+                    {'scan_time': 0.067},
+                    {'range_min': 0.01},
+                    {'range_max': 25.0},
+                    {'min_height': -1.0},
+                    {'max_height': 1.0},
+                    {'angle_min': -3.141592654},
+                    {'angle_max': 3.141592654},
+                    {'inf_epsilon': 1.0},
+                    {'use_inf': True},
+                    ],
+                remappings=[
+                    ('laser_1', '/lidar1/scan'),
+                    ('laser_2', '/lidar2/scan'),
+                    ('merged', '/merged'),
+                    ]
+            )
+        ],
+        output='screen',
     )
 
     ld.add_action(dual_laser_merger_node)
