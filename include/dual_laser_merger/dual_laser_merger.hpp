@@ -1,0 +1,82 @@
+// Copyright 2024 pradyum
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+#ifndef DUAL_LASER_MERGER__DUAL_LASER_MERGER_HPP_
+#define DUAL_LASER_MERGER__DUAL_LASER_MERGER_HPP_
+
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl_conversions/pcl_conversions.h>
+
+#include <chrono>
+#include <cmath>
+#include <memory>
+#include <string>
+
+#include "laser_geometry/laser_geometry.hpp"
+#include "message_filters/subscriber.h"
+#include "message_filters/sync_policies/approximate_time.h"
+#include "message_filters/synchronizer.h"
+#include "rclcpp/rclcpp.hpp"
+#include "sensor_msgs/msg/laser_scan.hpp"
+#include "sensor_msgs/msg/point_cloud2.hpp"
+#include "sensor_msgs/point_cloud2_iterator.hpp"
+#include "tf2_ros/buffer.h"
+#include "tf2_ros/transform_listener.h"
+#include "tf2_sensor_msgs/tf2_sensor_msgs.hpp"
+
+namespace merger_node
+{
+
+class MergerNode : public rclcpp::Node
+{
+public:
+  explicit MergerNode(const rclcpp::NodeOptions & options);
+
+private:
+  std::shared_ptr<tf2_ros::Buffer> tf2_buffer;
+  std::shared_ptr<tf2_ros::TransformListener> tf2_listener;
+  std::shared_ptr<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::msg::LaserScan, sensor_msgs::msg::LaserScan>>>
+  message_filter;
+  message_filters::Subscriber<sensor_msgs::msg::LaserScan> laser_1_sub;
+  message_filters::Subscriber<sensor_msgs::msg::LaserScan> laser_2_sub;
+  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr merged_pub;
+  laser_geometry::LaserProjection projector;
+
+  sensor_msgs::msg::LaserScan merged;
+  sensor_msgs::msg::PointCloud2 cloud_in_1;
+  sensor_msgs::msg::PointCloud2 cloud_in_2;
+  sensor_msgs::msg::PointCloud2 cloud_out;
+  pcl::PointCloud<pcl::PointXYZ> pcl_cloud_in_1;
+  pcl::PointCloud<pcl::PointXYZ> pcl_cloud_in_2;
+  pcl::PointCloud<pcl::PointXYZ> pcl_cloud_out;
+
+  int input_queue_size_param;
+  std::string target_frame_param;
+  double tolerance_param, min_height_param, max_height_param, angle_min_param, angle_max_param,
+    angle_increment_param, scan_time_param, range_min_param, range_max_param, inf_epsilon_param;
+  bool use_inf_param;
+  uint32_t ranges_size;
+  double range, angle;
+  int index;
+
+  void sub_callback(
+    const sensor_msgs::msg::LaserScan::ConstSharedPtr & lidar_1_msg,
+    const sensor_msgs::msg::LaserScan::ConstSharedPtr & lidar_2_msg);
+};
+
+}  // namespace merger_node
+
+#endif  // DUAL_LASER_MERGER__DUAL_LASER_MERGER_HPP_
