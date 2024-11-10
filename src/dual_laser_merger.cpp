@@ -76,30 +76,6 @@ void MergerNode::declare_param()
   laser_2_yaw_offset = this->declare_parameter("laser_2_yaw_offset", 0.0);
 }
 
-<<<<<<< HEAD
-  if (target_frame_param.empty()) {
-    RCLCPP_ERROR(this->get_logger(), "Target Frame cannot be Empty");
-  } else {
-    RCLCPP_INFO(this->get_logger(), "Target Frame: %s", target_frame_param.c_str());
-  }
-
-  merged_pub =
-    this->create_publisher<sensor_msgs::msg::LaserScan>("merged", rclcpp::SensorDataQoS());
-  laser_1_sub.subscribe(this, "laser_1", rclcpp::SensorDataQoS().get_rmw_qos_profile());
-  laser_2_sub.subscribe(this, "laser_2", rclcpp::SensorDataQoS().get_rmw_qos_profile());
-
-  tf2_buffer = std::make_shared<tf2_ros::Buffer>(this->get_clock());
-  tf2_listener = std::make_shared<tf2_ros::TransformListener>(*tf2_buffer, this);
-  message_filter =
-    std::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<
-        sensor_msgs::msg::LaserScan, sensor_msgs::msg::LaserScan>>>(
-      message_filters::sync_policies::ApproximateTime<
-      sensor_msgs::msg::LaserScan, sensor_msgs::msg::LaserScan>(input_queue_size_param),
-      laser_1_sub, laser_2_sub);
-  message_filter->setAgePenalty(tolerance_param);
-  message_filter->registerCallback(
-    std::bind(&MergerNode::sub_callback, this, std::placeholders::_1, std::placeholders::_2));
-=======
 void MergerNode::refresh_param()
 {
   this->get_parameter("tolerance", tolerance_param);
@@ -120,7 +96,6 @@ void MergerNode::refresh_param()
   this->get_parameter("laser_2_x_offset", laser_2_x_offset);
   this->get_parameter("laser_2_y_offset", laser_2_y_offset);
   this->get_parameter("laser_2_yaw_offset", laser_2_yaw_offset);
->>>>>>> 497c738 (added calibration functions)
 }
 
 void MergerNode::sub_callback(
