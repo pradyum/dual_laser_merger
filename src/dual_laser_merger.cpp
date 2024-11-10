@@ -30,9 +30,12 @@ MergerNode::MergerNode(const rclcpp::NodeOptions & options)
   }
 
   merged_pub =
-    this->create_publisher<sensor_msgs::msg::LaserScan>(this->get_parameter("merged_topic").as_string(), rclcpp::SensorDataQoS());
-  laser_1_sub.subscribe(this, this->get_parameter("laser_1_topic").as_string(), rclcpp::SensorDataQoS());
-  laser_2_sub.subscribe(this, this->get_parameter("laser_2_topic").as_string(), rclcpp::SensorDataQoS());
+    this->create_publisher<sensor_msgs::msg::LaserScan>(this->get_parameter(
+      "merged_topic").as_string(), rclcpp::SensorDataQoS());
+  laser_1_sub.subscribe(this, this->get_parameter("laser_1_topic").as_string(),
+      rclcpp::SensorDataQoS().get_rmw_qos_profile());
+  laser_2_sub.subscribe(this, this->get_parameter("laser_2_topic").as_string(),
+      rclcpp::SensorDataQoS().get_rmw_qos_profile());
 
   tf2_buffer = std::make_shared<tf2_ros::Buffer>(this->get_clock());
   tf2_listener = std::make_shared<tf2_ros::TransformListener>(*tf2_buffer, this);

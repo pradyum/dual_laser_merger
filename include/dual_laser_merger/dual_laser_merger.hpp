@@ -72,7 +72,9 @@ private:
   int input_queue_size_param;
   std::string target_frame_param;
   double tolerance_param, min_height_param, max_height_param, angle_min_param, angle_max_param,
-    angle_increment_param, scan_time_param, range_min_param, range_max_param, inf_epsilon_param, laser_1_x_offset, laser_1_y_offset, laser_1_yaw_offset, laser_2_x_offset, laser_2_y_offset, laser_2_yaw_offset;
+    angle_increment_param, scan_time_param, range_min_param, range_max_param, inf_epsilon_param,
+    laser_1_x_offset, laser_1_y_offset, laser_1_yaw_offset, laser_2_x_offset, laser_2_y_offset,
+    laser_2_yaw_offset;
   bool use_inf_param, enable_calibration_param;
   uint32_t ranges_size;
   double range, angle;
