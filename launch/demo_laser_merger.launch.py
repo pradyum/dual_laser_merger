@@ -44,7 +44,16 @@ def generate_launch_description():
                 plugin='merger_node::MergerNode',
                 name='dual_laser_merger',
                 parameters=[
+                    {'laser_1_topic': '/lidar1/scan'},
+                    {'laser_2_topic': '/lidar2/scan'},
+                    {'merged_topic': '/merged'},
                     {'target_frame': 'lsc_mount'},
+                    {'laser_1_x_offset': 0.0},
+                    {'laser_1_y_offset': 0.0},
+                    {'laser_1_yaw_offset': 0.0},
+                    {'laser_2_x_offset': -0.04},
+                    {'laser_2_y_offset': 0.0},
+                    {'laser_2_yaw_offset': 0.0},
                     {'tolerance': 0.01},
                     {'queue_size': 5},
                     {'angle_increment': 0.001},
@@ -58,11 +67,6 @@ def generate_launch_description():
                     {'inf_epsilon': 1.0},
                     {'use_inf': True},
                     ],
-                remappings=[
-                    ('laser_1', '/lidar1/scan'),
-                    ('laser_2', '/lidar2/scan'),
-                    ('merged', '/merged'),
-                    ]
             )
         ],
         output='screen',

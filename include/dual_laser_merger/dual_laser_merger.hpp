@@ -32,9 +32,12 @@
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
 #include "sensor_msgs/point_cloud2_iterator.hpp"
+#include "tf2/LinearMath/Quaternion.h"
 #include "tf2_ros/buffer.h"
 #include "tf2_ros/transform_listener.h"
+#include "tf2_ros/transform_broadcaster.h"
 #include "tf2_sensor_msgs/tf2_sensor_msgs.hpp"
+#include "geometry_msgs/msg/transform_stamped.hpp"
 
 namespace merger_node
 {
@@ -47,6 +50,7 @@ public:
 private:
   std::shared_ptr<tf2_ros::Buffer> tf2_buffer;
   std::shared_ptr<tf2_ros::TransformListener> tf2_listener;
+  std::shared_ptr<tf2_ros::TransformBroadcaster> tf2_broadcaster;
   std::shared_ptr<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<
       sensor_msgs::msg::LaserScan, sensor_msgs::msg::LaserScan>>>
   message_filter;
@@ -62,12 +66,14 @@ private:
   pcl::PointCloud<pcl::PointXYZ> pcl_cloud_in_1;
   pcl::PointCloud<pcl::PointXYZ> pcl_cloud_in_2;
   pcl::PointCloud<pcl::PointXYZ> pcl_cloud_out;
+  geometry_msgs::msg::TransformStamped tf2_msg;
+  tf2::Quaternion tf2_quaternion;
 
   int input_queue_size_param;
   std::string target_frame_param;
   double tolerance_param, min_height_param, max_height_param, angle_min_param, angle_max_param,
-    angle_increment_param, scan_time_param, range_min_param, range_max_param, inf_epsilon_param;
-  bool use_inf_param;
+    angle_increment_param, scan_time_param, range_min_param, range_max_param, inf_epsilon_param, laser_1_x_offset, laser_1_y_offset, laser_1_yaw_offset, laser_2_x_offset, laser_2_y_offset, laser_2_yaw_offset;
+  bool use_inf_param, enable_calibration_param;
   uint32_t ranges_size;
   double range, angle;
   int index;
@@ -75,6 +81,8 @@ private:
   void sub_callback(
     const sensor_msgs::msg::LaserScan::ConstSharedPtr & lidar_1_msg,
     const sensor_msgs::msg::LaserScan::ConstSharedPtr & lidar_2_msg);
+  void declare_param();
+  void refresh_param();
 };
 
 }  // namespace merger_node
