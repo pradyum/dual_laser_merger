@@ -21,6 +21,38 @@ namespace merger_node
 MergerNode::MergerNode(const rclcpp::NodeOptions & options)
 : Node("dual_laser_merger", options)
 {
+  declare_param();
+
+  if (target_frame_param.empty()) {
+    RCLCPP_ERROR(this->get_logger(), "Target Frame cannot be Empty");
+  } else {
+    RCLCPP_INFO(this->get_logger(), "Target Frame: %s", target_frame_param.c_str());
+  }
+
+  merged_pub =
+    this->create_publisher<sensor_msgs::msg::LaserScan>(this->get_parameter("merged_topic").as_string(), rclcpp::SensorDataQoS());
+  laser_1_sub.subscribe(this, this->get_parameter("laser_1_topic").as_string(), rclcpp::SensorDataQoS());
+  laser_2_sub.subscribe(this, this->get_parameter("laser_2_topic").as_string(), rclcpp::SensorDataQoS());
+
+  tf2_buffer = std::make_shared<tf2_ros::Buffer>(this->get_clock());
+  tf2_listener = std::make_shared<tf2_ros::TransformListener>(*tf2_buffer, this);
+  message_filter =
+    std::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<
+        sensor_msgs::msg::LaserScan, sensor_msgs::msg::LaserScan>>>(
+      message_filters::sync_policies::ApproximateTime<
+      sensor_msgs::msg::LaserScan, sensor_msgs::msg::LaserScan>(input_queue_size_param),
+      laser_1_sub, laser_2_sub);
+  message_filter->setAgePenalty(tolerance_param);
+  message_filter->registerCallback(
+    std::bind(&MergerNode::sub_callback, this, std::placeholders::_1, std::placeholders::_2));
+  tf2_broadcaster = std::make_shared<tf2_ros::TransformBroadcaster>(*this);
+}
+
+void MergerNode::declare_param()
+{
+  this->declare_parameter("laser_1_topic", "laser_1");
+  this->declare_parameter("laser_2_topic", "laser_2");
+  this->declare_parameter("merged_topic", "merged");
   target_frame_param = this->declare_parameter("target_frame", "");
   tolerance_param = this->declare_parameter("tolerance", 0.01);
   input_queue_size_param =
@@ -35,29 +67,35 @@ MergerNode::MergerNode(const rclcpp::NodeOptions & options)
   range_max_param = this->declare_parameter("range_max", std::numeric_limits<double>::max());
   inf_epsilon_param = this->declare_parameter("inf_epsilon", 1.0);
   use_inf_param = this->declare_parameter("use_inf", true);
+  enable_calibration_param = this->declare_parameter("enable_calibration", false);
+  laser_1_x_offset = this->declare_parameter("laser_1_x_offset", 0.0);
+  laser_1_y_offset = this->declare_parameter("laser_1_y_offset", 0.0);
+  laser_1_yaw_offset = this->declare_parameter("laser_1_yaw_offset", 0.0);
+  laser_2_x_offset = this->declare_parameter("laser_2_x_offset", 0.0);
+  laser_2_y_offset = this->declare_parameter("laser_2_y_offset", 0.0);
+  laser_2_yaw_offset = this->declare_parameter("laser_2_yaw_offset", 0.0);
+}
 
-  if (target_frame_param.empty()) {
-    RCLCPP_ERROR(this->get_logger(), "Target Frame cannot be Empty");
-  } else {
-    RCLCPP_INFO(this->get_logger(), "Target Frame: %s", target_frame_param.c_str());
-  }
-
-  merged_pub =
-    this->create_publisher<sensor_msgs::msg::LaserScan>("merged", rclcpp::SensorDataQoS());
-  laser_1_sub.subscribe(this, "laser_1", rclcpp::SensorDataQoS());
-  laser_2_sub.subscribe(this, "laser_2", rclcpp::SensorDataQoS());
-
-  tf2_buffer = std::make_shared<tf2_ros::Buffer>(this->get_clock());
-  tf2_listener = std::make_shared<tf2_ros::TransformListener>(*tf2_buffer, this);
-  message_filter =
-    std::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<
-        sensor_msgs::msg::LaserScan, sensor_msgs::msg::LaserScan>>>(
-      message_filters::sync_policies::ApproximateTime<
-      sensor_msgs::msg::LaserScan, sensor_msgs::msg::LaserScan>(input_queue_size_param),
-      laser_1_sub, laser_2_sub);
-  message_filter->setAgePenalty(tolerance_param);
-  message_filter->registerCallback(
-    std::bind(&MergerNode::sub_callback, this, std::placeholders::_1, std::placeholders::_2));
+void MergerNode::refresh_param()
+{
+  this->get_parameter("tolerance", tolerance_param);
+  this->get_parameter("queue_size", input_queue_size_param);
+  this->get_parameter("min_height", min_height_param);
+  this->get_parameter("max_height", max_height_param);
+  this->get_parameter("angle_min", angle_min_param);
+  this->get_parameter("angle_max", angle_max_param);
+  this->get_parameter("angle_increment", angle_increment_param);
+  this->get_parameter("scan_time", scan_time_param);
+  this->get_parameter("range_min", range_min_param);
+  this->get_parameter("range_max", range_max_param);
+  this->get_parameter("inf_epsilon", inf_epsilon_param);
+  this->get_parameter("use_inf", use_inf_param);
+  this->get_parameter("laser_1_x_offset", laser_1_x_offset);
+  this->get_parameter("laser_1_y_offset", laser_1_y_offset);
+  this->get_parameter("laser_1_yaw_offset", laser_1_yaw_offset);
+  this->get_parameter("laser_2_x_offset", laser_2_x_offset);
+  this->get_parameter("laser_2_y_offset", laser_2_y_offset);
+  this->get_parameter("laser_2_yaw_offset", laser_2_yaw_offset);
 }
 
 void MergerNode::sub_callback(
@@ -67,10 +105,28 @@ void MergerNode::sub_callback(
   if (target_frame_param.empty()) {
     rclcpp::shutdown();
   } else {
+    this->get_parameter<bool>("enable_calibration", enable_calibration_param);
+    if(enable_calibration_param) {
+      refresh_param();
+    }
+
     projector.projectLaser(*lidar_1_msg, cloud_in_1);
     projector.projectLaser(*lidar_2_msg, cloud_in_2);
 
     if (lidar_1_msg->header.frame_id != target_frame_param) {
+      tf2_msg.header = cloud_in_1.header;
+      tf2_msg.child_frame_id = cloud_in_1.header.frame_id + "_calibrated";
+      tf2_msg.transform.translation.x = laser_1_x_offset;
+      tf2_msg.transform.translation.y = laser_1_y_offset;
+      tf2_msg.transform.translation.z = 0.0;
+      tf2_quaternion.setRPY(0, 0, laser_1_yaw_offset);
+      tf2_msg.transform.rotation.x = tf2_quaternion.x();
+      tf2_msg.transform.rotation.y = tf2_quaternion.y();
+      tf2_msg.transform.rotation.z = tf2_quaternion.z();
+      tf2_msg.transform.rotation.w = tf2_quaternion.w();
+      tf2_broadcaster->sendTransform(tf2_msg);
+      cloud_in_1.header.frame_id = tf2_msg.child_frame_id;
+
       try {
         cloud_in_1 = tf2_buffer->transform(
           cloud_in_1, target_frame_param, tf2::durationFromSec(tolerance_param));
@@ -81,6 +137,19 @@ void MergerNode::sub_callback(
     }
 
     if (lidar_2_msg->header.frame_id != target_frame_param) {
+      tf2_msg.header = cloud_in_2.header;
+      tf2_msg.child_frame_id = cloud_in_2.header.frame_id + "_calibrated";
+      tf2_msg.transform.translation.x = laser_2_x_offset;
+      tf2_msg.transform.translation.y = laser_2_y_offset;
+      tf2_msg.transform.translation.z = 0.0;
+      tf2_quaternion.setRPY(0, 0, laser_2_yaw_offset);
+      tf2_msg.transform.rotation.x = tf2_quaternion.x();
+      tf2_msg.transform.rotation.y = tf2_quaternion.y();
+      tf2_msg.transform.rotation.z = tf2_quaternion.z();
+      tf2_msg.transform.rotation.w = tf2_quaternion.w();
+      tf2_broadcaster->sendTransform(tf2_msg);
+      cloud_in_2.header.frame_id = tf2_msg.child_frame_id;
+
       try {
         cloud_in_2 = tf2_buffer->transform(
           cloud_in_2, target_frame_param, tf2::durationFromSec(tolerance_param));
