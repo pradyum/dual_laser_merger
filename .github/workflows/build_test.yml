@@ -1,30 +1,30 @@
 ---
-name: Rolling build_test
+name: Humble build_test
 
 on:
   workflow_dispatch:
 
   push:
     branches:
-      - rolling
+      - humble
   
   pull_request:
     branches:
-      - rolling
+      - humble
 
 jobs:
-  test_build_rolling:
+  test_build_humble:
     runs-on: ubuntu-latest
     container:
-      image: osrf/ros:rolling-desktop
+      image: osrf/ros:humble-desktop
     steps:
       - uses: ros-tooling/setup-ros@v0.7
         with:
-          required-ros-distributions: rolling
+          required-ros-distributions: humble
       - uses: ros-tooling/action-ros-ci@v0.3
         with:
-          target-ros2-distro: rolling
+          target-ros2-distro: humble
           skip-tests: false
           rosdep-check: true
           package-name: 'dual_laser_merger'
-          ref: rolling
+          ref: humble
