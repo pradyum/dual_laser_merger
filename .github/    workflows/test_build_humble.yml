@@ -1,0 +1,30 @@
+---
+name: ROS2 test_build_humble
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - humble
+  
+  pull_request:
+    branches:
+      - humble
+
+jobs:
+  test_build_humble:
+    runs-on: ubuntu-latest
+    container:
+      image: osrf/ros:humble-core
+    steps:
+      - uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: humble
+      - uses: ros-tooling/action-ros-ci@v0.3
+        with:
+          target-ros2-distro: humble
+          skip-tests: false
+          rosdep-check: true
+          package-name: 'dual_lidar_merger'
+          ref: humble
