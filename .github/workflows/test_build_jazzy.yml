@@ -16,7 +16,7 @@ jobs:
   test_build_jazzy:
     runs-on: ubuntu-latest
     container:
-      image: osrf/ros:jazzy-core
+      image: ros:jazzy-ros-core
     steps:
       - uses: ros-tooling/setup-ros@v0.7
         with:
