@@ -14,7 +14,7 @@ on:
 
 jobs:
   test_build_rolling:
-    runs-on: build-pc
+    runs-on: ubuntu-latest
     container:
       image: osrf/ros:rolling-desktop
     steps:
