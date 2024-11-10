@@ -26,5 +26,5 @@ jobs:
           target-ros2-distro: jazzy
           skip-tests: false
           rosdep-check: true
-          package-name: 'dual_lidar_merger'
+          package-name: 'dual_laser_merger'
           ref: jazzy
