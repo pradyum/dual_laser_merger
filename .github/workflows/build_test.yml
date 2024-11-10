@@ -27,4 +27,3 @@ jobs:
           skip-tests: false
           rosdep-check: true
           package-name: 'dual_laser_merger'
-          ref: rolling
