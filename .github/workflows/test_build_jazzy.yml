@@ -16,7 +16,7 @@ jobs:
   test_build_jazzy:
     runs-on: ubuntu-latest
     container:
-      image: osrf/ros:jazzy-core
+      image: osrf/ros:jazzy-desktop
     steps:
       - uses: ros-tooling/setup-ros@v0.7
         with:
@@ -26,5 +26,5 @@ jobs:
           target-ros2-distro: jazzy
           skip-tests: false
           rosdep-check: true
-          package-name: 'dual_lidar_merger'
+          package-name: 'dual_laser_merger'
           ref: jazzy
