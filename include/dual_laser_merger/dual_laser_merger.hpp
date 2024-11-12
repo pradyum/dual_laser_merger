@@ -17,6 +17,7 @@
 
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include <pcl/kdtree/kdtree_flann.h>
 #include <pcl_conversions/pcl_conversions.h>
 
 #include <chrono>
@@ -56,9 +57,12 @@ private:
   message_filter;
   message_filters::Subscriber<sensor_msgs::msg::LaserScan> laser_1_sub;
   message_filters::Subscriber<sensor_msgs::msg::LaserScan> laser_2_sub;
-  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr merged_pub;
+  rclcpp::Publisher<sensor_msgs::msg::LaserScan>::SharedPtr merged_scan_pub;
+  rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr merged_cloud_pub;
   laser_geometry::LaserProjection projector;
 
+  sensor_msgs::msg::LaserScan lidar_1_avg;
+  sensor_msgs::msg::LaserScan lidar_2_avg;
   sensor_msgs::msg::LaserScan merged;
   sensor_msgs::msg::PointCloud2 cloud_in_1;
   sensor_msgs::msg::PointCloud2 cloud_in_2;
@@ -74,11 +78,16 @@ private:
   double tolerance_param, min_height_param, max_height_param, angle_min_param, angle_max_param,
     angle_increment_param, scan_time_param, range_min_param, range_max_param, inf_epsilon_param,
     laser_1_x_offset, laser_1_y_offset, laser_1_yaw_offset, laser_2_x_offset, laser_2_y_offset,
-    laser_2_yaw_offset;
-  bool use_inf_param, enable_calibration_param;
+    laser_2_yaw_offset, allowed_radius_param;
+  bool use_inf_param, enable_calibration_param, enable_shadow_filter_param, enable_average_filter_param;
   uint32_t ranges_size;
   double range, angle;
-  int index;
+  int index, numNearbyPoints;
+  double allowed_radius_scaled, dist_from_origin;
+
+  pcl::KdTreeFLANN<pcl::PointXYZ> kdtree;
+  std::vector<int> pointIndices;
+  std::vector<float> pointDistances;
 
   void sub_callback(
     const sensor_msgs::msg::LaserScan::ConstSharedPtr & lidar_1_msg,
