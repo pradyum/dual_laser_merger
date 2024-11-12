@@ -66,6 +66,9 @@ def generate_launch_description():
                     {'angle_max': 3.141592654},
                     {'inf_epsilon': 1.0},
                     {'use_inf': True},
+                    {'allowed_radius': 0.45},
+                    {'enable_shadow_filter': True},
+                    {'enable_average_filter': True},
                     ],
             )
         ],
