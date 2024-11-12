@@ -24,6 +24,7 @@
 #include <cmath>
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "laser_geometry/laser_geometry.hpp"
 #include "message_filters/subscriber.h"
@@ -79,7 +80,8 @@ private:
     angle_increment_param, scan_time_param, range_min_param, range_max_param, inf_epsilon_param,
     laser_1_x_offset, laser_1_y_offset, laser_1_yaw_offset, laser_2_x_offset, laser_2_y_offset,
     laser_2_yaw_offset, allowed_radius_param;
-  bool use_inf_param, enable_calibration_param, enable_shadow_filter_param, enable_average_filter_param;
+  bool use_inf_param, enable_calibration_param, enable_shadow_filter_param,
+    enable_average_filter_param;
   uint32_t ranges_size;
   double range, angle;
   int index, numNearbyPoints;
