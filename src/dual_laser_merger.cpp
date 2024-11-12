@@ -29,6 +29,7 @@ MergerNode::MergerNode(const rclcpp::NodeOptions & options)
     RCLCPP_INFO(this->get_logger(), "Target Frame: %s", target_frame_param.c_str());
   }
 
+<<<<<<< HEAD
   merged_pub =
     this->create_publisher<sensor_msgs::msg::LaserScan>(
     this->get_parameter(
@@ -39,6 +40,18 @@ MergerNode::MergerNode(const rclcpp::NodeOptions & options)
   laser_2_sub.subscribe(
     this, this->get_parameter("laser_2_topic").as_string(),
     rclcpp::SensorDataQoS().get_rmw_qos_profile());
+=======
+  merged_scan_pub =
+    this->create_publisher<sensor_msgs::msg::LaserScan>(this->get_parameter(
+      "merged_scan_topic").as_string(), rclcpp::SensorDataQoS());
+  merged_cloud_pub =
+    this->create_publisher<sensor_msgs::msg::PointCloud2>(this->get_parameter(
+      "merged_cloud_topic").as_string(), rclcpp::SensorDataQoS());
+  laser_1_sub.subscribe(this, this->get_parameter("laser_1_topic").as_string(),
+      rclcpp::SensorDataQoS());
+  laser_2_sub.subscribe(this, this->get_parameter("laser_2_topic").as_string(),
+      rclcpp::SensorDataQoS());
+>>>>>>> 208df64 (added shadow and average filters)
 
   tf2_buffer = std::make_shared<tf2_ros::Buffer>(this->get_clock());
   tf2_listener = std::make_shared<tf2_ros::TransformListener>(*tf2_buffer, this);
@@ -58,7 +71,8 @@ void MergerNode::declare_param()
 {
   this->declare_parameter("laser_1_topic", "laser_1");
   this->declare_parameter("laser_2_topic", "laser_2");
-  this->declare_parameter("merged_topic", "merged");
+  this->declare_parameter("merged_scan_topic", "merged");
+  this->declare_parameter("merged_cloud_topic", "merged_cloud");
   target_frame_param = this->declare_parameter("target_frame", "");
   tolerance_param = this->declare_parameter("tolerance", 0.01);
   input_queue_size_param =
@@ -80,6 +94,9 @@ void MergerNode::declare_param()
   laser_2_x_offset = this->declare_parameter("laser_2_x_offset", 0.0);
   laser_2_y_offset = this->declare_parameter("laser_2_y_offset", 0.0);
   laser_2_yaw_offset = this->declare_parameter("laser_2_yaw_offset", 0.0);
+  allowed_radius_param = this->declare_parameter("allowed_radius", 1.0);
+  enable_shadow_filter_param = this->declare_parameter("enable_shadow_filter", false);
+  enable_average_filter_param = this->declare_parameter("enable_average_filter", false);
 }
 
 void MergerNode::refresh_param()
@@ -102,6 +119,9 @@ void MergerNode::refresh_param()
   this->get_parameter("laser_2_x_offset", laser_2_x_offset);
   this->get_parameter("laser_2_y_offset", laser_2_y_offset);
   this->get_parameter("laser_2_yaw_offset", laser_2_yaw_offset);
+  this->get_parameter("allowed_radius", allowed_radius_param);
+  this->get_parameter("enable_shadow_filter", enable_shadow_filter_param);
+  this->get_parameter("enable_average_filter", enable_average_filter_param);
 }
 
 void MergerNode::sub_callback(
@@ -116,8 +136,34 @@ void MergerNode::sub_callback(
       refresh_param();
     }
 
-    projector.projectLaser(*lidar_1_msg, cloud_in_1);
-    projector.projectLaser(*lidar_2_msg, cloud_in_2);
+    if(enable_average_filter_param) {
+      lidar_1_avg = *lidar_1_msg;
+      lidar_2_avg = *lidar_2_msg;
+      for(size_t i = 0; i <= lidar_1_msg->ranges.size(); i++) {
+        if(i==0) {
+          lidar_1_avg.ranges[i] = (lidar_1_msg->ranges[lidar_1_msg->ranges.size()-1] + lidar_1_msg->ranges[i] + lidar_1_msg->ranges[i+1])/3;
+        } else if(i==(lidar_1_msg->ranges.size()-1)) {
+          lidar_1_avg.ranges[i] = (lidar_1_msg->ranges[i-1] + lidar_1_msg->ranges[i] + lidar_1_msg->ranges[0])/3;
+        } else {
+          lidar_1_avg.ranges[i] = (lidar_1_msg->ranges[i-1] + lidar_1_msg->ranges[i] + lidar_1_msg->ranges[i+1])/3;
+        }
+      }
+      for(size_t i = 0; i <= lidar_2_msg->ranges.size(); i++) {
+        if(i==0) {
+          lidar_2_avg.ranges[i] = (lidar_2_msg->ranges[lidar_2_msg->ranges.size()-1] + lidar_2_msg->ranges[i] + lidar_2_msg->ranges[i+1])/3;
+        } else if(i==(lidar_2_msg->ranges.size()-1)) {
+          lidar_2_avg.ranges[i] = (lidar_2_msg->ranges[i-1] + lidar_2_msg->ranges[i] + lidar_2_msg->ranges[0])/3;
+        } else {
+          lidar_2_avg.ranges[i] = (lidar_2_msg->ranges[i-1] + lidar_2_msg->ranges[i] + lidar_2_msg->ranges[i+1])/3;
+        }
+      }
+
+      projector.projectLaser(lidar_1_avg, cloud_in_1);
+      projector.projectLaser(lidar_2_avg, cloud_in_2);
+    } else {
+      projector.projectLaser(*lidar_1_msg, cloud_in_1);
+      projector.projectLaser(*lidar_2_msg, cloud_in_2);
+    }
 
     if (lidar_1_msg->header.frame_id != target_frame_param) {
       tf2_msg.header = cloud_in_1.header;
@@ -175,7 +221,28 @@ void MergerNode::sub_callback(
     pcl_cloud_out = pcl_cloud_in_1;
     pcl_cloud_out += pcl_cloud_in_2;
 
+    if(enable_shadow_filter_param) {
+      allowed_radius_scaled = allowed_radius_param / range_max_param;
+      kdtree.setInputCloud(pcl_cloud_out.makeShared());
+
+      for (auto& point : pcl_cloud_out.points) {
+        dist_from_origin = std::sqrt(std::pow(point.x, 2) + std::pow(point.y, 2));
+        numNearbyPoints = kdtree.radiusSearch(point, allowed_radius_scaled * dist_from_origin, pointIndices, pointDistances);
+        numNearbyPoints -= 1;
+        if(numNearbyPoints == 0) {
+          if(use_inf_param) {
+            point.x = std::numeric_limits<double>::infinity();
+            point.y = std::numeric_limits<double>::infinity();
+          } else {
+            point.x = range_max_param + inf_epsilon_param;
+            point.y = range_max_param + inf_epsilon_param;
+          }
+        }
+      }
+    }
+
     pcl::toROSMsg(pcl_cloud_out, cloud_out);
+    merged_cloud_pub->publish(cloud_out);
 
     merged.header = cloud_out.header;
     merged.header.frame_id = target_frame_param;
@@ -223,7 +290,7 @@ void MergerNode::sub_callback(
       }
     }
 
-    merged_pub->publish(merged);
+    merged_scan_pub->publish(merged);
   }
 }
 
