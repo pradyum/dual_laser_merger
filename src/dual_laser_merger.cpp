@@ -127,21 +127,27 @@ void MergerNode::sub_callback(
       lidar_1_avg = *lidar_1_msg;
       lidar_2_avg = *lidar_2_msg;
       for(size_t i = 0; i <= lidar_1_msg->ranges.size(); i++) {
-        if(i==0) {
-          lidar_1_avg.ranges[i] = (lidar_1_msg->ranges[lidar_1_msg->ranges.size()-1] + lidar_1_msg->ranges[i] + lidar_1_msg->ranges[i+1])/3;
-        } else if(i==(lidar_1_msg->ranges.size()-1)) {
-          lidar_1_avg.ranges[i] = (lidar_1_msg->ranges[i-1] + lidar_1_msg->ranges[i] + lidar_1_msg->ranges[0])/3;
+        if(i == 0) {
+          lidar_1_avg.ranges[i] = (lidar_1_msg->ranges[lidar_1_msg->ranges.size() - 1] +
+            lidar_1_msg->ranges[i] + lidar_1_msg->ranges[i + 1]) / 3;
+        } else if(i == (lidar_1_msg->ranges.size() - 1)) {
+          lidar_1_avg.ranges[i] = (lidar_1_msg->ranges[i - 1] + lidar_1_msg->ranges[i] +
+            lidar_1_msg->ranges[0]) / 3;
         } else {
-          lidar_1_avg.ranges[i] = (lidar_1_msg->ranges[i-1] + lidar_1_msg->ranges[i] + lidar_1_msg->ranges[i+1])/3;
+          lidar_1_avg.ranges[i] = (lidar_1_msg->ranges[i - 1] + lidar_1_msg->ranges[i] +
+            lidar_1_msg->ranges[i + 1]) / 3;
         }
       }
       for(size_t i = 0; i <= lidar_2_msg->ranges.size(); i++) {
-        if(i==0) {
-          lidar_2_avg.ranges[i] = (lidar_2_msg->ranges[lidar_2_msg->ranges.size()-1] + lidar_2_msg->ranges[i] + lidar_2_msg->ranges[i+1])/3;
-        } else if(i==(lidar_2_msg->ranges.size()-1)) {
-          lidar_2_avg.ranges[i] = (lidar_2_msg->ranges[i-1] + lidar_2_msg->ranges[i] + lidar_2_msg->ranges[0])/3;
+        if(i == 0) {
+          lidar_2_avg.ranges[i] = (lidar_2_msg->ranges[lidar_2_msg->ranges.size() - 1] +
+            lidar_2_msg->ranges[i] + lidar_2_msg->ranges[i + 1]) / 3;
+        } else if(i == (lidar_2_msg->ranges.size() - 1)) {
+          lidar_2_avg.ranges[i] = (lidar_2_msg->ranges[i - 1] + lidar_2_msg->ranges[i] +
+            lidar_2_msg->ranges[0]) / 3;
         } else {
-          lidar_2_avg.ranges[i] = (lidar_2_msg->ranges[i-1] + lidar_2_msg->ranges[i] + lidar_2_msg->ranges[i+1])/3;
+          lidar_2_avg.ranges[i] = (lidar_2_msg->ranges[i - 1] + lidar_2_msg->ranges[i] +
+            lidar_2_msg->ranges[i + 1]) / 3;
         }
       }
 
@@ -212,9 +218,10 @@ void MergerNode::sub_callback(
       allowed_radius_scaled = allowed_radius_param / range_max_param;
       kdtree.setInputCloud(pcl_cloud_out.makeShared());
 
-      for (auto& point : pcl_cloud_out.points) {
+      for (auto & point : pcl_cloud_out.points) {
         dist_from_origin = std::sqrt(std::pow(point.x, 2) + std::pow(point.y, 2));
-        numNearbyPoints = kdtree.radiusSearch(point, allowed_radius_scaled * dist_from_origin, pointIndices, pointDistances);
+        numNearbyPoints = kdtree.radiusSearch(point, allowed_radius_scaled * dist_from_origin,
+            pointIndices, pointDistances);
         numNearbyPoints -= 1;
         if(numNearbyPoints == 0) {
           if(use_inf_param) {
