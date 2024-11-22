@@ -2,8 +2,8 @@
 Changelog for package dual_laser_merger
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.0.1 (2024-11-22)
+------------------
 * added missing dependency
 * added shadow and average filters
 * added calibration functions
