@@ -2,6 +2,10 @@
 Changelog for package dual_laser_merger
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+Forthcoming
+-----------
+* minor version bump denoting ros2 distro - humble
+
 0.0.1 (2024-11-22)
 ------------------
 * added missing dependency
