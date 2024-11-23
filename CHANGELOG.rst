@@ -2,8 +2,8 @@
 Changelog for package dual_laser_merger
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Forthcoming
------------
+0.3.1 (2024-11-23)
+------------------
 * minor version bump denoting ros2 distro - jazzy
 
 0.0.1 (2024-11-22)
