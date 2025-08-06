@@ -46,7 +46,7 @@ def generate_launch_description():
                 parameters=[
                     {'laser_1_topic': '/lidar1/scan'},
                     {'laser_2_topic': '/lidar2/scan'},
-                    {'merged_topic': '/merged'},
+                    {'merged_scan_topic': '/merged'},
                     {'target_frame': 'lsc_mount'},
                     {'laser_1_x_offset': 0.0},
                     {'laser_1_y_offset': 0.0},
