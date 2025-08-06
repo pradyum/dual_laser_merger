@@ -27,9 +27,9 @@
 #include <vector>
 
 #include "laser_geometry/laser_geometry.hpp"
-#include "message_filters/subscriber.h"
-#include "message_filters/sync_policies/approximate_time.h"
-#include "message_filters/synchronizer.h"
+#include "message_filters/subscriber.hpp"
+#include "message_filters/sync_policies/approximate_time.hpp"
+#include "message_filters/synchronizer.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/laser_scan.hpp"
 #include "sensor_msgs/msg/point_cloud2.hpp"
