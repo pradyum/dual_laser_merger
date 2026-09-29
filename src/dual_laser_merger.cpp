@@ -41,7 +41,7 @@ MergerNode::MergerNode(const rclcpp::NodeOptions & options)
       rclcpp::SensorDataQoS());
 
   tf2_buffer = std::make_shared<tf2_ros::Buffer>(this->get_clock());
-  tf2_listener = std::make_shared<tf2_ros::TransformListener>(*tf2_buffer, this);
+  tf2_listener = std::make_shared<tf2_ros::TransformListener>(*tf2_buffer, *this);
   message_filter =
     std::make_shared<message_filters::Synchronizer<message_filters::sync_policies::ApproximateTime<
         sensor_msgs::msg::LaserScan, sensor_msgs::msg::LaserScan>>>(
